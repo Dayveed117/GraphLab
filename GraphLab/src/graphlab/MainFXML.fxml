@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.canvas.Canvas?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
@@ -9,18 +8,17 @@
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.Separator?>
-<?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
 
-<SplitPane dividerPositions="0.5" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="graphlab.FXMLDocumentController">
-  <items>
-      <BorderPane prefHeight="679.0" prefWidth="345.0">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="graphlab.FXMLDocumentController">
+   <left>
+      <BorderPane prefHeight="200.0" prefWidth="200.0" style="-fx-border-color: #FFE4C4 #FFE4C4; -fx-border-width: 5px;" BorderPane.alignment="CENTER">
          <top>
-            <MenuBar style="-fx-background-color: #FFE4C4; -fx-border-color: #BC8F8F;" BorderPane.alignment="CENTER">
+            <MenuBar style="-fx-background-color: #FFE4C4; -fx-border-color: #D2B48C; -fx-border-width: 3px;" BorderPane.alignment="CENTER">
               <menus>
                 <Menu mnemonicParsing="false" text="File">
                   <items>
@@ -32,64 +30,59 @@
                     <MenuItem mnemonicParsing="false" text="Delete" />
                   </items>
                 </Menu>
-                <Menu mnemonicParsing="false" text="About">
+                <Menu mnemonicParsing="false" text="Help">
                   <items>
                     <MenuItem mnemonicParsing="false" text="About" />
                   </items>
                 </Menu>
               </menus>
-               <opaqueInsets>
-                  <Insets />
-               </opaqueInsets>
             </MenuBar>
          </top>
          <center>
-            <VBox alignment="TOP_CENTER" spacing="15.0" style="-fx-background-color: #D2B48C;" BorderPane.alignment="BOTTOM_RIGHT">
+            <VBox alignment="TOP_CENTER" prefHeight="200.0" prefWidth="100.0" spacing="15.0" style="-fx-background-color: #D2B48C;" BorderPane.alignment="CENTER">
                <children>
-                  <Label alignment="TOP_CENTER" text="Nome do ficheiro">
+                  <Label text="Grafo1.xml">
                      <VBox.margin>
-                        <Insets bottom="30.0" top="10.0" />
+                        <Insets top="15.0" />
                      </VBox.margin>
                   </Label>
-                  <ToggleButton mnemonicParsing="false" text="Node Manipulation">
+                  <ToggleButton fx:id="NodeMode" mnemonicParsing="false" text="Node Manipulation">
                      <VBox.margin>
-                        <Insets bottom="10.0" />
+                        <Insets top="30.0" />
                      </VBox.margin>
                   </ToggleButton>
-                  <TextField prefHeight="31.0" promptText="Node designation">
-                     <font>
-                        <Font name="System Italic" size="15.0" />
-                     </font>
-                  </TextField>
-                  <ComboBox prefWidth="150.0" promptText="Color" />
-                  <ToggleButton mnemonicParsing="false" text="Edge Manipulation">
+                  <TextField fx:id="nodeName" promptText="Node Designation" />
+                  <ComboBox fx:id="nodeColor" prefWidth="150.0" promptText="Color" />
+                  <ToggleButton fx:id="EdgeMode" mnemonicParsing="false" text="Edge Manipulation">
                      <VBox.margin>
-                        <Insets bottom="10.0" top="30.0" />
+                        <Insets top="40.0" />
                      </VBox.margin>
                   </ToggleButton>
-                  <TextField promptText="Weight" />
-                  <ComboBox prefWidth="150.0" promptText="Color" />
-                  <ComboBox prefWidth="150.0" promptText="Direction" />
-                  <Separator prefWidth="282.0">
+                  <TextField fx:id="edgeWeight" promptText="Weight" />
+                  <ComboBox fx:id="edgeColor" prefWidth="150.0" promptText="Color" />
+                  <ComboBox fx:id="edgeDirection" prefWidth="150.0" promptText="Direction" />
+                  <Separator prefWidth="200.0">
                      <VBox.margin>
                         <Insets bottom="30.0" top="30.0" />
                      </VBox.margin>
                   </Separator>
-                  <ComboBox prefWidth="150.0" promptText="Start" />
-                  <ComboBox prefWidth="150.0" promptText="End" />
-                  <ComboBox prefWidth="150.0" promptText="Algorithm" />
-                  <Button mnemonicParsing="false" text="Trace">
+                  <ComboBox fx:id="srcNode" prefWidth="150.0" promptText="Start" />
+                  <ComboBox fx:id="destNode" prefWidth="150.0" promptText="End" />
+                  <ComboBox fx:id="pathAlg" prefWidth="150.0" promptText="Algorithm" />
+                  <Button fx:id="tracePath" mnemonicParsing="false" text="Trace">
                      <VBox.margin>
                         <Insets top="30.0" />
                      </VBox.margin>
                   </Button>
                </children>
                <opaqueInsets>
-                  <Insets top="10.0" />
+                  <Insets />
                </opaqueInsets>
             </VBox>
          </center>
       </BorderPane>
-      <Canvas fx:id="cv" height="800.0" width="959.0" />
-  </items>
-</SplitPane>
+   </left>
+   <center>
+      <StackPane fx:id="sp" prefHeight="150.0" prefWidth="200.0" style="-fx-background-color: #abcdef;" BorderPane.alignment="CENTER" />
+   </center>
+</BorderPane>
