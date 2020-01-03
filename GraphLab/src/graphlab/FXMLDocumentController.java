@@ -37,15 +37,20 @@ public class FXMLDocumentController implements Initializable {
     private final double radius = 30;
     private final double swidth = 2.5;
     private double srcX, srcY, destX, destY;
-    private ArrayList<String> nodes = new ArrayList<>();
-    private ArrayList<String> edges = new ArrayList<>();
-    private Node lastHeld;
     
     @FXML Pane pane;
     
+    // Distinguir ids de nodos ou arestas
+    private ArrayList<String> nodes = new ArrayList<>();
+    private ArrayList<String> edges = new ArrayList<>();
+
+    // Último nodo clicado
+    private Node lastHeld;
+
     // MenuBar
     @FXML MenuItem clearAll;
     @FXML MenuItem about;
+    @FXML MenuItem guide;
     
     
     // Node Mode
@@ -81,7 +86,7 @@ public class FXMLDocumentController implements Initializable {
             if(EdgeMode.isSelected()) {
                 createEdge(e);
                 
-                //Conseguir fazer delete a partir do EdgeMode tambem
+                // Fazer delete a partir do EdgeMode tambem
                 if(e.isShiftDown()) {
                     Object obj = e.getTarget();
                     if(deleteNode(obj))
@@ -89,7 +94,7 @@ public class FXMLDocumentController implements Initializable {
                 }
             }
             
-            
+            // refresh das combo boxes
             srcNode.setItems(FXCollections.observableArrayList(nodes));
             destNode.setItems(FXCollections.observableArrayList(nodes));
         });
@@ -115,19 +120,43 @@ public class FXMLDocumentController implements Initializable {
         });
         
         about.setOnAction(e -> {
-            Alert alert = new Alert(AlertType.INFORMATION);
-            alert.setTitle("GraphLab 2019 About");
-            alert.setHeaderText("GraphLab2019 beta™");
-            String frase1 = "Aplicação realizada pelos alunos da Licenciatura em EI:\n\n";
-            String frase2 = "David Bugalho a40284\n";
-            String frase3 = "André Oliveira a39474\n\n\n";
-            String frase4 = "Ideia extremamente ambiciosa, o grupo ficou um pouco aquém da sua ideia de implementação.\n\n";
-            String frase5 = "Contudo, o tempo dedicado para a realização deste trabalho jamais será um fracasso.\n\n";
-            String frase6 = "Trabalho não funcional, mas honesto, divirta-se com GraphLab!";
-                    
-            alert.setContentText(frase1+frase2+frase3+frase4+frase5+frase6);
-            alert.show();
+            info_about();
         });
+        
+        guide.setOnAction(e -> {
+            info_guide();
+        });
+    }
+
+    public void info_guide() {
+        Alert alert = new Alert(AlertType.INFORMATION);
+        alert.setTitle("Guia para GraphLab2019");
+        alert.setHeaderText("Utilização");
+        String frase1 = "NodeMode Toggle:\n\n";
+        String frase2 = "Mouse click para inserir um nodo, nome não pode ser vazio, nem repetido.\n";
+        String frase3 = "Drag and drop para mover um nodo.\n\n";
+        String frase4 = "EdgeMode Toggle:\n\n";
+        String frase5 = "Clicar em 2 nodos distintos para uni-los com uma aresta.\n";
+        String frase6 = "Drag and drop para mover uma aresta.\n\n";
+        String frase7 = "Shift+MouseClick para apagar quer nodo quer aresta.\n";
+        
+        alert.setContentText(frase1+frase2+frase3+frase4+frase5+frase6+frase7);
+        alert.show();
+    }
+
+    public void info_about() {
+        Alert alert = new Alert(AlertType.INFORMATION);
+        alert.setTitle("GraphLab 2019 About");
+        alert.setHeaderText("GraphLab2019 beta™");
+        String frase1 = "Aplicação realizada pelos alunos da Licenciatura em EI:\n\n";
+        String frase2 = "David Bugalho a40284\n";
+        String frase3 = "André Oliveira a39474\n\n\n";
+        String frase4 = "Ideia extremamente ambiciosa, o grupo ficou um pouco aquém da sua ideia de implementação.\n\n";
+        String frase5 = "Contudo, o tempo dedicado para a realização deste trabalho jamais será um fracasso.\n\n";
+        String frase6 = "Trabalho não funcional, mas honesto, divirta-se com GraphLab!";
+        
+        alert.setContentText(frase1+frase2+frase3+frase4+frase5+frase6);
+        alert.show();
     }
     
 
