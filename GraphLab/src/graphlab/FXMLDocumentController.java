@@ -12,21 +12,21 @@ import javafx.collections.FXCollections;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.Group;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.TextField;
-import javafx.scene.control.Button;
+import javafx.scene.control.Button;;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
-import javafx.scene.text.Text;
 
 /**
  *
@@ -38,9 +38,15 @@ public class FXMLDocumentController implements Initializable {
     private final double swidth = 2.5;
     private double srcX, srcY, destX, destY;
     private ArrayList<String> nodes = new ArrayList<>();
+    private ArrayList<String> edges = new ArrayList<>();
+    private Node lastHeld;
     
-    @FXML StackPane sp;
     @FXML Pane pane;
+    
+    // MenuBar
+    @FXML MenuItem clearAll;
+    @FXML MenuItem about;
+    
     
     // Node Mode
     @FXML ToggleButton NodeMode;
@@ -63,42 +69,147 @@ public class FXMLDocumentController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         
-        // Elevar o programa ao estado basal
+        // Triggers e encher CB
         startup();
         
         // Pane Event Handlers
         pane.setOnMouseClicked((MouseEvent e) -> {
-            if(NodeMode.isSelected()) {
+            
+            if(NodeMode.isSelected()) 
                 clickNodeOp(e);
-            }
             
             if(EdgeMode.isSelected()) {
-                // TODO: Saber o que fazer
+                createEdge(e);
+                
+                //Conseguir fazer delete a partir do EdgeMode tambem
+                if(e.isShiftDown()) {
+                    Object obj = e.getTarget();
+                    if(deleteNode(obj))
+                        System.out.println("Node Deleted successfully");
+                }
             }
+            
             
             srcNode.setItems(FXCollections.observableArrayList(nodes));
             destNode.setItems(FXCollections.observableArrayList(nodes));
         });
         
         pane.setOnDragDetected((MouseEvent e) -> {
-            if(NodeMode.isSelected()) {
+            
+            lastHeld = null;
+            
+            if(NodeMode.isSelected()) 
                 dragNodeOp(e);
-            }
             
             if(EdgeMode.isSelected()) {
-                // TODO: Saber o que fazer
+                // TODO: ??
             }
         });
         
         tracePath.setOnAction(e -> {
             applyPath();
         });
+        
+        clearAll.setOnAction(e -> {
+            fullreset();
+        });
+        
+        about.setOnAction(e -> {
+            Alert alert = new Alert(AlertType.INFORMATION);
+            alert.setTitle("GraphLab 2019 About");
+            alert.setHeaderText("GraphLab2019 beta™");
+            String frase1 = "Aplicação realizada pelos alunos da Licenciatura em EI:\n\n";
+            String frase2 = "David Bugalho a40284\n";
+            String frase3 = "André Oliveira a39474\n\n\n";
+            String frase4 = "Ideia extremamente ambiciosa, o grupo ficou um pouco aquém da sua ideia de implementação.\n\n";
+            String frase5 = "Contudo, o tempo dedicado para a realização deste trabalho jamais será um fracasso.\n\n";
+            String frase6 = "Trabalho não funcional, mas honesto, divirta-se com GraphLab!";
+                    
+            alert.setContentText(frase1+frase2+frase3+frase4+frase5+frase6);
+            alert.show();
+        });
+    }
+    
+
+    public void createEdge(MouseEvent e) {
+        
+        Node n = (Node)e.getTarget();
+        
+        // se for um dos filhos do pane
+        // se os nodos forem diferentes
+        // se um dos nodos nao for o pane
+        // se eles ja tiverem conectados
+        if(nodes.contains(n.getUserData().toString())) {    
+            if(lastHeld != null && !n.getUserData().equals("pane") && !n.getUserData().toString().equals(lastHeld.getUserData().toString())) {    
+                Line line = initLine(n);
+                
+                pane.getChildren().add(line);
+                line.toBack();
+                line.requestFocus();
+                
+                lastHeld = null;
+            }
+            else
+                lastHeld = n;
+        }
+        // TODO: Saber o que fazer
+        // costumizar a aresta?
+    }
+    
+     public Line initLine(Node n1) {
+        // Cria um linha, ainda ponto no nodo clicado
+        Circle dest = (Circle)n1;
+        Circle src = (Circle)lastHeld; 
+        
+        String edgeName = dest.getUserData().toString() + "__" + src.getUserData().toString();
+        String check = src.getUserData().toString() + "__" + dest.getUserData().toString();
+        
+        Line line = new Line();
+        
+        if(!edges.contains(edgeName) && !edges.contains(check)) {
+            
+            edges.add(edgeName);
+            
+            line.setCursor(Cursor.HAND);
+            line.startXProperty().bind(src.centerXProperty());
+            line.startYProperty().bind(src.centerYProperty());
+            line.endXProperty().bind(dest.centerXProperty());
+            line.endYProperty().bind(dest.centerYProperty());
+
+            line.setUserData(edgeName);
+            line.setStroke(edgeColor.getValue());
+            line.setStrokeWidth(3);
+            System.out.println("Edge Added Successfully");
+        }
+
+        return line;
     }
 
+     
+     // Menu e utilidade
     public void startup() {
         
         NodeMode.setSelected(true);
         EdgeMode.setSelected(false);
+        nodes.add("None");
+        pane.setUserData("pane");
+        
+        toggles();
+        comboBoxFill();
+    }
+
+    public void comboBoxFill() {
+        
+        String[] directions = {"Unidirectional", "Bidirectional"};
+        edgeDirection.setItems(FXCollections.observableArrayList(directions));
+        edgeDirection.getSelectionModel().select(directions[0]);
+        
+        String[] algorithms = {"Djikstra", "ShortestPath", "PPL", "PPP"};
+        pathAlg.setItems(FXCollections.observableArrayList(algorithms));
+        pathAlg.getSelectionModel().select(algorithms[1]);
+    }
+
+    public void toggles() {
         
         NodeMode.setOnAction(e -> {
             if(EdgeMode.isSelected())
@@ -106,32 +217,31 @@ public class FXMLDocumentController implements Initializable {
         });
         
         EdgeMode.setOnAction(e -> {
-           if(NodeMode.isSelected())
-               NodeMode.setSelected(false);
+            if(NodeMode.isSelected())
+                NodeMode.setSelected(false);
         });
-        
-        String[] directions = {"Unidirectional", "Bidirectional"};
-        edgeDirection.setItems(FXCollections.observableArrayList(directions));
-        edgeDirection.getSelectionModel().select(directions[0]);
-        
-        nodes.add("None");
-        String[] algorithms = {"Djikstra", "ShortestPath", "PPL", "PPP"};
-        pathAlg.setItems(FXCollections.observableArrayList(algorithms));
-        pathAlg.getSelectionModel().select(algorithms[1]);
+    }
+    
+    public void fullreset() {
+        nodes.clear();
+        edges.clear();
+        pane.getChildren().clear();
     }
 
+    
+    
     public void clickNodeOp(MouseEvent e) {
         
         if(!e.isShiftDown()) {
             Object obj = e.getTarget();
             if(createNode(e.getX(), e.getY(), obj))
-                System.out.println("Added successfully " + e.getX() + " - " + e.getY());
+                System.out.println("Node Added successfully " + e.getX() + " - " + e.getY());
         }
         
         if(e.isShiftDown()) {
             Object obj = e.getTarget();
             if(deleteNode(obj))
-                System.out.println("Deleted successfully");
+                System.out.println("Node Deleted successfully");
         }
     }
     
@@ -148,27 +258,6 @@ public class FXMLDocumentController implements Initializable {
             n.setOnMouseDragged(nodeOnMouseDraggedEH);
         }
     }
-    
-    //tmp
-    public boolean edgeWork(MouseEvent e) {
-        
-        if(EdgeMode.isSelected()) {
-                if(e.isDragDetect()) {
-                    
-                    Line edge = new Line(e.getX(), e.getY(), e.getX(), e.getY());
-                    edge.setStroke(Color.CHOCOLATE);
-                    edge.setStrokeWidth(2.5);
-                
-                    pane.setOnMouseDragged(evt -> {
-                        System.out.println(e.getX() + " - " + e.getY());
-                        edge.setEndX(evt.getX());
-                        edge.setEndY(evt.getY());
-                    });
-                }
-            }// edge mode
-        return true; //tmp
-    } 
-    
 
     // drag and drop? 
     EventHandler<MouseEvent> nodeOnMouseDraggedEH = new EventHandler<MouseEvent>() {
@@ -178,7 +267,7 @@ public class FXMLDocumentController implements Initializable {
                 double diffY = e.getSceneY() - srcY;
                 double newX = destX+ diffX;
                 double newY = destY+ diffY;
-            
+
                 ((Node)(e.getTarget())).setTranslateX(newX);
                 ((Node)(e.getTarget())).setTranslateY(newY);
             }
@@ -202,12 +291,8 @@ public class FXMLDocumentController implements Initializable {
             
             // Descrever o nodo
             Circle circle = new Circle(X, Y, radius);
-            circle.setUserData(nodeName.getText());
-            circle.setFill(Color.WHITE);
-            circle.setStrokeWidth(swidth);
-            circle.setStroke(nodeColor.getValue());
-            
-            
+            describeNode(circle);
+
             // TODO: Adicionar nodo na estrutura GRAFO
             nodes.add(nodeName.getText());
             nodeName.clear();
@@ -217,20 +302,20 @@ public class FXMLDocumentController implements Initializable {
         return false;
     }
     
+    public void describeNode(Circle circle) {
+        circle.setCursor(Cursor.HAND);
+        circle.setUserData(nodeName.getText());
+        circle.setFill(Color.WHITE);
+        circle.setStrokeWidth(swidth);
+        circle.setStroke(nodeColor.getValue());
+    }
+
     public boolean deleteNode(Object obj) {
         Node node = (Node)obj;
-        nodes.remove(node.getId());
+        nodes.remove(node.getUserData().toString());
         // TODO: Remover nodo na estrutura GRAFO
         
         return pane.getChildren().remove(node);
-    }
-    
-    public void createEdge(double X, double Y, Object obj) {
-         // TODO: Perceber como criar estas "arestas"
-    }
-    
-    public void deleteEdge(Object obj) {
-        // TODO: perceber como fazer createEdge
     }
     
     @FXML
@@ -239,10 +324,20 @@ public class FXMLDocumentController implements Initializable {
         Circle src = (Circle)findNode(srcNode.getValue());
         Circle dest = (Circle)findNode(destNode.getValue());
     
-        src.setFill(Color.CRIMSON);
-        dest.setFill(Color.CRIMSON);
+        if(src != null && dest != null) { // eventualmente implementar lógica do caminho e de ter ou src ou dest como "None"
             
-        return true;
+            // regret doing this everytime
+            String edgeName = dest.getUserData().toString() + "__" + src.getUserData().toString();
+            String check = src.getUserData().toString() + "__" + dest.getUserData().toString();
+            
+            if(edges.contains(edgeName) || edges.contains(check)) {
+                src.setFill(Color.CHOCOLATE);
+                dest.setFill(Color.CHOCOLATE);
+            }
+            
+        }
+        
+        return false;
     }
     
     public Node findNode(Object o) {
